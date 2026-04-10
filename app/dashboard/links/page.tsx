@@ -52,15 +52,13 @@ function AddLinkForm({ onAdd }: { onAdd: (link: any) => void }) {
   const [icon, setIcon] = useState("🔗");
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [focusedInput, setFocusedInput] = useState<string | null>(null);
 
   const emojis = ["🔗", "🎨", "📸", "💼", "🎵", "📝", "▶️", "📧", "🐙", "🏀", "☕", "🛒"];
 
   const handleSubmit = async () => {
     if (!title.trim() || !url.trim()) return;
-
-    // Add https:// if missing
     const finalUrl = url.startsWith("http") ? url : `https://${url}`;
-
     setLoading(true);
     try {
       const res = await api.post("/links/", { title, url: finalUrl, icon });
@@ -75,28 +73,84 @@ function AddLinkForm({ onAdd }: { onAdd: (link: any) => void }) {
   if (!open) {
     return (
       <motion.button
-        className="add-btn"
         onClick={() => setOpen(true)}
         whileTap={{ scale: 0.97 }}
+        style={{
+          display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem",
+          width: "100%", padding: "0.875rem",
+          background: "#f8fafc", border: "2px dashed #e2e8f0", borderRadius: "14px",
+          color: "#64748b", fontSize: "0.9rem", fontWeight: 500,
+          cursor: "pointer", marginTop: "0.5rem", fontFamily: "inherit",
+          transition: "all 0.15s",
+        }}
+        onMouseEnter={e => {
+          (e.currentTarget as HTMLButtonElement).style.borderColor = "#6366f1";
+          (e.currentTarget as HTMLButtonElement).style.color = "#6366f1";
+          (e.currentTarget as HTMLButtonElement).style.background = "rgba(99,102,241,0.05)";
+        }}
+        onMouseLeave={e => {
+          (e.currentTarget as HTMLButtonElement).style.borderColor = "#e2e8f0";
+          (e.currentTarget as HTMLButtonElement).style.color = "#64748b";
+          (e.currentTarget as HTMLButtonElement).style.background = "#f8fafc";
+        }}
       >
-        <span className="add-plus">+</span> Add new link
+        <span style={{ fontSize: "1.2rem", lineHeight: 1 }}>+</span>
+        Add new link
       </motion.button>
     );
   }
 
+  const inputStyle = (name: string): React.CSSProperties => ({
+    width: "100%", padding: "0.75rem 1rem",
+    border: `1.5px solid ${focusedInput === name ? "#6366f1" : "#e2e8f0"}`,
+    borderRadius: "10px", fontSize: "0.875rem", outline: "none",
+    boxSizing: "border-box", fontFamily: "inherit", color: "#0f172a",
+    background: "#fff", transition: "border-color 0.15s",
+    boxShadow: focusedInput === name ? "0 0 0 3px rgba(99,102,241,0.1)" : "none",
+  });
+
   return (
     <motion.div
-      className="add-form"
-      initial={{ opacity: 0, height: 0 }}
-      animate={{ opacity: 1, height: "auto" }}
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      style={{
+        background: "#fff", border: "1.5px solid #e2e8f0",
+        borderRadius: "16px", padding: "1.25rem",
+        marginTop: "0.75rem",
+        boxShadow: "0 4px 16px rgba(0,0,0,0.06)",
+      }}
     >
-      <div className="form-row">
-        <div className="emoji-picker">
+      {/* Form header */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
+        <span style={{ fontSize: "0.8rem", fontWeight: 700, color: "#0f172a", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+          New Link
+        </span>
+        <button
+          onClick={() => setOpen(false)}
+          style={{ background: "none", border: "none", color: "#94a3b8", cursor: "pointer", fontSize: "1rem", padding: "0.2rem", lineHeight: 1 }}
+        >
+          ✕
+        </button>
+      </div>
+
+      {/* Emoji picker */}
+      <div style={{ marginBottom: "0.875rem" }}>
+        <span style={{ fontSize: "0.72rem", fontWeight: 600, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: "0.5rem" }}>
+          Icon
+        </span>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.375rem" }}>
           {emojis.map((e) => (
             <button
               key={e}
-              className={`emoji-option ${icon === e ? "selected" : ""}`}
               onClick={() => setIcon(e)}
+              style={{
+                width: "36px", height: "36px", borderRadius: "8px",
+                border: `2px solid ${icon === e ? "#6366f1" : "transparent"}`,
+                background: icon === e ? "rgba(99,102,241,0.1)" : "#f8fafc",
+                cursor: "pointer", fontSize: "1rem",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                transition: "all 0.1s",
+              }}
             >
               {e}
             </button>
@@ -104,27 +158,61 @@ function AddLinkForm({ onAdd }: { onAdd: (link: any) => void }) {
         </div>
       </div>
 
-      <div className="form-row">
+      {/* Title input */}
+      <div style={{ marginBottom: "0.75rem" }}>
+        <label style={{ fontSize: "0.72rem", fontWeight: 600, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: "0.375rem" }}>
+          Title
+        </label>
         <input
-          className="form-input"
-          placeholder="Title (e.g. My Portfolio)"
+          style={inputStyle("title")}
+          placeholder="e.g. My Portfolio"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
+          onFocus={() => setFocusedInput("title")}
+          onBlur={() => setFocusedInput(null)}
         />
       </div>
 
-      <div className="form-row">
+      {/* URL input */}
+      <div style={{ marginBottom: "1rem" }}>
+        <label style={{ fontSize: "0.72rem", fontWeight: 600, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: "0.375rem" }}>
+          URL
+        </label>
         <input
-          className="form-input"
-          placeholder="URL (e.g. mysite.com)"
+          style={inputStyle("url")}
+          placeholder="e.g. mysite.com"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
+          onFocus={() => setFocusedInput("url")}
+          onBlur={() => setFocusedInput(null)}
+          onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
         />
       </div>
 
-      <div className="form-actions">
-        <button className="cancel-btn" onClick={() => setOpen(false)}>Cancel</button>
-        <button className="save-btn" onClick={handleSubmit} disabled={loading}>
+      {/* Actions */}
+      <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem" }}>
+        <button
+          onClick={() => setOpen(false)}
+          style={{
+            padding: "0.625rem 1.125rem", borderRadius: "9px",
+            border: "1.5px solid #e2e8f0", background: "#fff",
+            color: "#64748b", fontSize: "0.85rem", fontWeight: 500,
+            cursor: "pointer", fontFamily: "inherit",
+          }}
+        >
+          Cancel
+        </button>
+        <button
+          onClick={handleSubmit}
+          disabled={loading || !title.trim() || !url.trim()}
+          style={{
+            padding: "0.625rem 1.25rem", borderRadius: "9px",
+            border: "none", background: loading || !title.trim() || !url.trim() ? "#c7d2fe" : "#6366f1",
+            color: "#fff", fontSize: "0.85rem", fontWeight: 600,
+            cursor: loading || !title.trim() || !url.trim() ? "not-allowed" : "pointer",
+            fontFamily: "inherit", transition: "background 0.15s",
+          }}
+        >
           {loading ? "Adding..." : "Add link"}
         </button>
       </div>

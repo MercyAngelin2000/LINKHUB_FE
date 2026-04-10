@@ -31,7 +31,8 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col items-center px-4 py-8">
 
-      <h1 className="text-2xl font-semibold mb-6">My Links</h1>
+      <h1 className="text-2xl font-semibold mb-5">My Links</h1>
+      <br />
 
       {/* EMPTY STATE */}
       {links.length === 0 && (
@@ -53,10 +54,21 @@ export default function Home() {
                 window.open(link.url, "_blank");
               });
             }}
-            className="block text-white text-center py-3 font-medium"
+            className="block text-white text-center py-3 font-medium mb-5 shadow rounded-lg transition-transform hover:scale-105"
             style={{
               background: "var(--primary)",
               borderRadius: "var(--button-radius)",
+              marginBottom: "1.25rem",
+              boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+              padding: "0.5rem 1.5rem",
+              fontSize: "1rem",
+              fontWeight: 600,
+              letterSpacing: "0.01em",
+              fontFamily: "inherit",
+              transition: "all 0.18s cubic-bezier(0.4,0,0.2,1)",
+              transform: "scale(1)",
+              position: "relative",
+              overflow: "hidden",
             }}
           >
             {link.title}
