@@ -16,6 +16,11 @@ pnpm dev
 # or
 bun dev
 ```
+add env file at Frontend 
+.env => saave as .env
+paste the below
+NEXT_PUBLIC_API_URL=http://localhost:8000
+
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
